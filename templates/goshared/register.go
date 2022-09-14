@@ -32,6 +32,7 @@ func Register(tpl *template.Template, params pgs.Parameters) {
 		"errIdxCause":   fns.errIdxCause,
 		"errname":       fns.errName,
 		"multierrname":  fns.multiErrName,
+		"importPath":    fns.ImportPath,
 		"inKey":         fns.inKey,
 		"inType":        fns.inType,
 		"isBytes":       fns.isBytes,
@@ -343,8 +344,8 @@ func (fns goSharedFuncs) enumName(enum pgs.Enum) string {
 	}
 }
 
-func (fns goSharedFuncs) enumPackages(enums []pgs.Enum) map[pgs.Name]pgs.FilePath {
-	out := make(map[pgs.Name]pgs.FilePath, len(enums))
+func (fns goSharedFuncs) enumPackages(enums []pgs.Enum) map[pgs.Name]pgs.Enum {
+	out := make(map[pgs.Name]pgs.Enum, len(enums))
 
 	nameCollision := make(map[pgs.Name]int)
 
@@ -352,14 +353,14 @@ func (fns goSharedFuncs) enumPackages(enums []pgs.Enum) map[pgs.Name]pgs.FilePat
 
 		pkgName := fns.PackageName(en)
 
-		path, ok := out[pkgName]
+		other, ok := out[pkgName]
 
-		if ok && path != fns.ImportPath(en) {
+		if ok && fns.ImportPath(other) != fns.ImportPath(en) {
 			nameCollision[pkgName] = nameCollision[pkgName] + 1
 			pkgName = pkgName + pgs.Name(strconv.Itoa(nameCollision[pkgName]))
 		}
 
-		out[pkgName] = fns.ImportPath(en)
+		out[pkgName] = en
 	}
 
 	return out
