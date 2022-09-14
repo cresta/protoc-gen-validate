@@ -6,6 +6,7 @@ import (
 
 	cases "github.com/envoyproxy/protoc-gen-validate/tests/harness/cases/go"
 	other_package "github.com/envoyproxy/protoc-gen-validate/tests/harness/cases/other_package/go"
+	yet_another_package "github.com/envoyproxy/protoc-gen-validate/tests/harness/cases/yet_another_package/go"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/durationpb"
@@ -278,6 +279,10 @@ var int64Cases = []TestCase{
 	{"int64 - exclusive gte & lte - invalid", &cases.Int64ExGTELTE{Val: 200}, 1},
 
 	{"int64 - ignore_empty gte & lte - valid", &cases.Int64Ignore{Val: 0}, 0},
+
+	{"int64 optional - lte - valid", &cases.Int64LTEOptional{Val: &wrapperspb.Int64(63).Value}, 0},
+	{"int64 optional - lte - valid (equal)", &cases.Int64LTEOptional{Val: &wrapperspb.Int64(64).Value}, 0},
+	{"int64 optional - lte - valid (unset)", &cases.Int64LTEOptional{}, 0},
 }
 
 var uint32Cases = []TestCase{
@@ -1023,6 +1028,8 @@ var enumCases = []TestCase{
 	{"enum repeated (external) - defined_only - valid", &cases.RepeatedExternalEnumDefined{Val: []other_package.Embed_Enumerated{other_package.Embed_VALUE}}, 0},
 	{"enum repeated (external) - defined_only - invalid", &cases.RepeatedExternalEnumDefined{Val: []other_package.Embed_Enumerated{math.MaxInt32}}, 1},
 
+	{"enum repeated (another external) - defined_only - valid", &cases.RepeatedYetAnotherExternalEnumDefined{Val: []yet_another_package.Embed_Enumerated{yet_another_package.Embed_VALUE}}, 0},
+
 	{"enum map - defined_only - valid", &cases.MapEnumDefined{Val: map[string]cases.TestEnum{"foo": cases.TestEnum_TWO}}, 0},
 	{"enum map - defined_only - invalid", &cases.MapEnumDefined{Val: map[string]cases.TestEnum{"foo": math.MaxInt32}}, 1},
 
@@ -1056,6 +1063,9 @@ var messageCases = []TestCase{
 	{"message - cross-package embed none - valid (nil)", &cases.MessageCrossPackage{}, 0},
 	{"message - cross-package embed none - valid (empty)", &cases.MessageCrossPackage{Val: &other_package.Embed{}}, 1},
 	{"message - cross-package embed none - invalid", &cases.MessageCrossPackage{Val: &other_package.Embed{Val: -1}}, 1},
+
+	{"message - required - valid", &cases.MessageRequiredButOptional{Val: &cases.TestMsg{Const: "foo"}}, 0},
+	{"message - required - valid (unset)", &cases.MessageRequiredButOptional{}, 0},
 }
 
 var repeatedCases = []TestCase{
@@ -1189,6 +1199,10 @@ var oneofCases = []TestCase{
 
 	{"oneof - required - valid", &cases.OneOfRequired{O: &cases.OneOfRequired_X{X: ""}}, 0},
 	{"oneof - require - invalid", &cases.OneOfRequired{}, 1},
+
+	{"oneof - ignore_empty - valid (X)", &cases.OneOfIgnoreEmpty{O: &cases.OneOfIgnoreEmpty_X{X: ""}}, 0},
+	{"oneof - ignore_empty - valid (Y)", &cases.OneOfIgnoreEmpty{O: &cases.OneOfIgnoreEmpty_Y{Y: []byte("")}}, 0},
+	{"oneof - ignore_empty - valid (Z)", &cases.OneOfIgnoreEmpty{O: &cases.OneOfIgnoreEmpty_Z{Z: 0}}, 0},
 }
 
 var wrapperCases = []TestCase{
